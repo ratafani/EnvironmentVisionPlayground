@@ -1,0 +1,25 @@
+#usda 1.0
+(
+    customLayerData = {
+        string creator = "Reality Composer Pro Version 2.0 (494.100.6)"
+    }
+    defaultPrim = "Root"
+    metersPerUnit = 1
+    upAxis = "Y"
+)
+
+def Xform "Root"
+{
+    def "SkySphere" (
+        active = true
+        prepend apiSchemas = ["MaterialBindingAPI"]
+        prepend references = @SkySphere.usdz@
+    )
+    {
+        rel material:binding = </Root/SkySphere/SkySphere_mat> (
+            bindMaterialAs = "weakerThanDescendants"
+        )
+        float3 xformOp:scale = (1, 1, 1)
+    }
+}
+

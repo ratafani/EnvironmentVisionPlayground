@@ -1,5 +1,13 @@
 {
   "pathsToIds" : {
-    "RealityKitContent\/Sources\/RealityKitContent\/RealityKitContent.rkassets\/Immersive.usda" : "C6A7F375-BFE9-46E0-9EA6-1A6B150F43FD"
+    "\/RealityKitContent\/Sources\/RealityKitContent\/RealityKitContent.rkassets\/immersive2.usda" : "042C8A2E-1F6E-4E2C-BBF1-F09FF0C2550E",
+    "RealityKitContent\/Sources\/RealityKitContent\/RealityKitContent.rkassets\/Immersive.usda" : "C6A7F375-BFE9-46E0-9EA6-1A6B150F43FD",
+    "RealityKitContent\/Sources\/RealityKitContent\/RealityKitContent.rkassets\/immersive2.usda" : "68ABA774-AE99-45ED-ACBE-5D33D98FC194"
+  },
+  "projectID" : -6484739959539586575,
+  "uuidToIntID" : {
+    "042C8A2E-1F6E-4E2C-BBF1-F09FF0C2550E" : 1071978244347213074,
+    "68ABA774-AE99-45ED-ACBE-5D33D98FC194" : 1906176385019636672,
+    "C6A7F375-BFE9-46E0-9EA6-1A6B150F43FD" : 7652416980242688470
   }
 }

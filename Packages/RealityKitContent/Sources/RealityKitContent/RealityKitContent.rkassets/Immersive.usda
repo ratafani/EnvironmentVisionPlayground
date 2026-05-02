@@ -9,42 +9,397 @@ def Xform "Root"
 {
     reorder nameChildren = ["Sphere_Left", "Sphere_Right", "GridMaterial"]
     def "SkyDome" (
-        active = true
         prepend references = @SkyDome.usdz@
     )
     {
-        float3 xformOp:scale = (0.01, 0.01, 0.01)
-        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
-    }
-
-    def Xform "Video_Dock" (
-        references = None
-    )
-    {
-        double3 xformOp:translate = (0, 0.8, -3)
+        float3 xformOp:scale = (100, 100, 100)
+        float3 xformOp:translate = (0.003800923, 0.24652198, 0)
         uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
 
-        def Xform "Player"
+        over "mtl"
         {
-            double3 xformOp:translate = (0, 0.6, 0)
-            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
-
-            def RealityKitComponent "CustomDockingRegion"
+            over "DomeMATSG"
             {
-                token info:id = "RealityKit.CustomDockingRegion"
+                token cullMode = "unspecified" (
+                    allowedTokens = ["unspecified", "none", "front", "back"]
+                )
+                string inputs:file5:varname (
+                    customData = {
+                        dictionary realitykit = {
+                            float2 positionInSubgraph = (-124.125, 87.5)
+                            int stackingOrderInSubgraph = 237
+                        }
+                    }
+                )
+                token outputs:mtlx:surface.connect = </Root/SkyDome/mtl/DomeMATSG/UnlitSurface.outputs:out>
+                token outputs:realitykit:vertex
+                token outputs:surface.connect = </Root/SkyDome/mtl/DomeMATSG/DomeMAT.outputs:surface>
+                string[] ui:nodegraph:realitykit:node:attributesShowingChildren = ["outputs:mtlx:surface", "outputs:mtlx:surface"]
+                float2 ui:nodegraph:realitykit:subgraphOutputs:pos = (1447.6289, 164.96094)
+                int ui:nodegraph:realitykit:subgraphOutputs:stackingOrder = 214
 
-                def RealityKitStruct "m_bounds"
+                over "DomeMAT" (
+                    active = false
+                )
                 {
-                    float3 max = (1.2, 0.5, 0)
-                    float3 min = (-1.2, -0.5, -0)
+                    color3f inputs:diffuseColor = (0.6347451, 0.94763297, 0.98926073) (
+                        colorSpace = "srgb_displayp3"
+                    )
+                    float inputs:metallic = 1
+                }
+
+                def Shader "Mix"
+                {
+                    uniform token info:id = "ND_mix_color3"
+                    color3f inputs:bg = (0.5425518, 0.9515895, 1) (
+                        colorSpace = "srgb_texture"
+                    )
+                    color3f inputs:fg = (1, 1, 1) (
+                        colorSpace = "srgb_texture"
+                    )
+                    float inputs:mix.connect = </Root/SkyDome/mtl/DomeMATSG/Abs.outputs:out>
+                    color3f outputs:out
+                    float2 ui:nodegraph:node:pos = (961.5781, 152.60156)
+                    int ui:nodegraph:node:stackingOrder = 219
+                }
+
+                def Shader "Abs"
+                {
+                    uniform token info:id = "ND_absval_float"
+                    float inputs:in.connect = </Root/SkyDome/mtl/DomeMATSG/Fractal3D.outputs:out>
+                    float outputs:out
+                    float2 ui:nodegraph:node:pos = (800.4531, 167.44531)
+                    int ui:nodegraph:node:stackingOrder = 155
+                }
+
+                def Shader "Time"
+                {
+                    uniform token info:id = "ND_time_float"
+                    float outputs:out
+                    float2 ui:nodegraph:node:pos = (229.92188, 329.8711)
+                    int ui:nodegraph:node:stackingOrder = 197
+                }
+
+                def Shader "Position"
+                {
+                    uniform token info:id = "ND_position_vector3"
+                    float3 outputs:out
+                    float2 ui:nodegraph:node:pos = (125.60547, 153.78125)
+                    int ui:nodegraph:node:stackingOrder = 204
+                }
+
+                def Shader "Add"
+                {
+                    uniform token info:id = "ND_add_vector3FA"
+                    float3 inputs:in1.connect = </Root/SkyDome/mtl/DomeMATSG/Multiply.outputs:out>
+                    float inputs:in2.connect = </Root/SkyDome/mtl/DomeMATSG/Multiply_1.outputs:out>
+                    float3 outputs:out
+                    float2 ui:nodegraph:node:pos = (435.21484, 244.9961)
+                    int ui:nodegraph:node:stackingOrder = 187
+                }
+
+                def Shader "Fractal3D"
+                {
+                    uniform token info:id = "ND_fractal3d_float"
+                    float inputs:amplitude = 1
+                    float inputs:diminish = 0.5
+                    float inputs:lacunarity = 3
+                    int inputs:octaves = 5
+                    float3 inputs:position = (0, 0.47, 0)
+                    float3 inputs:position.connect = </Root/SkyDome/mtl/DomeMATSG/Add.outputs:out>
+                    float outputs:out
+                    float2 ui:nodegraph:node:pos = (607.8711, 163.5586)
+                    int ui:nodegraph:node:stackingOrder = 221
+                }
+
+                def Shader "ConstantFloat"
+                {
+                    uniform token info:id = "ND_constant_float"
+                    float inputs:value = 0.004
+                    float outputs:out
+                    float2 ui:nodegraph:node:pos = (-72.08203, 238.38281)
+                    int ui:nodegraph:node:stackingOrder = 245
+                }
+
+                def Shader "Multiply"
+                {
+                    uniform token info:id = "ND_multiply_vector3FA"
+                    prepend float3 inputs:in1.connect = </Root/SkyDome/mtl/DomeMATSG/Position.outputs:out>
+                    float inputs:in2.connect = </Root/SkyDome/mtl/DomeMATSG/Multiply_2.outputs:out>
+                    float3 outputs:out
+                    float2 ui:nodegraph:node:pos = (326.41016, 183.5664)
+                    int ui:nodegraph:node:stackingOrder = 194
+                    string[] ui:nodegraph:realitykit:node:attributesShowingChildren = ["inputs:in1", "outputs:out", "outputs:out"]
+                }
+
+                def Shader "Multiply_1"
+                {
+                    uniform token info:id = "ND_multiply_float"
+                    float inputs:in1.connect = </Root/SkyDome/mtl/DomeMATSG/Time.outputs:out>
+                    float inputs:in2 = 0.03
+                    float outputs:out
+                    float2 ui:nodegraph:node:pos = (350.11328, 263.27734)
+                    int ui:nodegraph:node:stackingOrder = 248
+                }
+
+                def Shader "Multiply_2"
+                {
+                    uniform token info:id = "ND_multiply_float"
+                    float inputs:in1.connect = </Root/SkyDome/mtl/DomeMATSG/ConstantFloat.outputs:out>
+                    float inputs:in2 = 0.3
+                    float outputs:out
+                    float2 ui:nodegraph:node:pos = (219.98438, 229.41016)
+                    int ui:nodegraph:node:stackingOrder = 246
+                }
+
+                def Shader "UnlitSurface"
+                {
+                    uniform token info:id = "ND_realitykit_unlit_surfaceshader"
+                    bool inputs:applyPostProcessToneMap
+                    color3f inputs:color.connect = </Root/SkyDome/mtl/DomeMATSG/Mix.outputs:out>
+                    bool inputs:hasPremultipliedAlpha
+                    float inputs:opacity
+                    float inputs:opacityThreshold
+                    token outputs:out
+                    float2 ui:nodegraph:node:pos = (1193.4688, 135.09375)
+                    int ui:nodegraph:node:stackingOrder = 251
+                }
+            }
+
+            over "GroundMATSG"
+            {
+                token cullMode = "unspecified" (
+                    allowedTokens = ["unspecified", "none", "front", "back"]
+                )
+                string inputs:file4:varname = "" (
+                    customData = {
+                        dictionary realitykit = {
+                            float2 positionInSubgraph = (-124.25, 87.5)
+                        }
+                    }
+                )
+                token outputs:mtlx:surface.connect = </Root/SkyDome/mtl/GroundMATSG/PreviewSurface.outputs:out>
+                token outputs:realitykit:vertex
+                token outputs:surface.connect = </Root/SkyDome/mtl/GroundMATSG/GroundMAT.outputs:surface>
+                float2 ui:nodegraph:realitykit:subgraphOutputs:pos = (112.75, 110.5)
+
+                over "GroundMAT" (
+                    active = true
+                )
+                {
+                    color3f inputs:diffuseColor = (0.5609676, 0.58997303, 0.9664548) (
+                        colorSpace = "srgb_texture"
+                    )
+                    float inputs:metallic = 0.4
+                }
+
+                def Shader "PreviewSurface" (
+                    active = false
+                )
+                {
+                    uniform token info:id = "ND_UsdPreviewSurface_surfaceshader"
+                    token outputs:out
+                    float2 ui:nodegraph:node:pos = (-255, 105)
+                }
+            }
+
+            over "GridMATSG"
+            {
+                string inputs:file3:varname (
+                    customData = {
+                        dictionary realitykit = {
+                            float2 positionInSubgraph = (526.51953, 51.117188)
+                            int stackingOrderInSubgraph = 15
+                        }
+                    }
+                )
+                token outputs:mtlx:surface.connect = </Root/SkyDome/mtl/GridMATSG/UnlitSurface.outputs:out>
+                token outputs:realitykit:vertex
+                token outputs:surface.connect = </Root/SkyDome/mtl/GridMATSG/GridMAT.outputs:surface>
+                float2 ui:nodegraph:realitykit:subgraphOutputs:pos = (298.8828, 38.746094)
+                int ui:nodegraph:realitykit:subgraphOutputs:stackingOrder = 75
+
+                over "GridMAT" (
+                    active = false
+                )
+                {
+                    color3f inputs:diffuseColor = (0.5887143, 0.59668756, 0.7814062) (
+                        colorSpace = "srgb_texture"
+                    )
+                }
+
+                def Shader "WorleyNoise3D"
+                {
+                    uniform token info:id = "ND_worleynoise3d_float"
+                    float inputs:jitter = 1
+                    float3 inputs:position.connect = </Root/SkyDome/mtl/GridMATSG/Add.outputs:out>
+                    float outputs:out
+                    float2 ui:nodegraph:node:pos = (-394.0625, 148.1836)
+                    int ui:nodegraph:node:stackingOrder = 92
+                }
+
+                def Shader "Position"
+                {
+                    uniform token info:id = "ND_position_vector3"
+                    float3 outputs:out
+                    float2 ui:nodegraph:node:pos = (-733.7617, 102.28906)
+                    int ui:nodegraph:node:stackingOrder = 102
+                }
+
+                def Shader "Time"
+                {
+                    uniform token info:id = "ND_time_float"
+                    float outputs:out
+                    float2 ui:nodegraph:node:pos = (-646.5156, 233.45703)
+                    int ui:nodegraph:node:stackingOrder = 96
+                }
+
+                def Shader "Add"
+                {
+                    uniform token info:id = "ND_add_vector3FA"
+                    float3 inputs:in1.connect = </Root/SkyDome/mtl/GridMATSG/Multiply.outputs:out>
+                    float inputs:in2.connect = </Root/SkyDome/mtl/GridMATSG/Time.outputs:out>
+                    float3 outputs:out
+                    float2 ui:nodegraph:node:pos = (-546.6875, 180.8086)
+                    int ui:nodegraph:node:stackingOrder = 94
+                }
+
+                def Shader "ConstantFloat"
+                {
+                    uniform token info:id = "ND_constant_float"
+                    float inputs:value = 1
+                    float outputs:out
+                    float2 ui:nodegraph:node:pos = (-746.77734, 163.78125)
+                    int ui:nodegraph:node:stackingOrder = 98
+                }
+
+                def Shader "Multiply"
+                {
+                    uniform token info:id = "ND_multiply_vector3FA"
+                    prepend float3 inputs:in1.connect = </Root/SkyDome/mtl/GridMATSG/Position.outputs:out>
+                    float inputs:in2.connect = </Root/SkyDome/mtl/GridMATSG/ConstantFloat.outputs:out>
+                    float3 outputs:out
+                    float2 ui:nodegraph:node:pos = (-610.53516, 142.0586)
+                    int ui:nodegraph:node:stackingOrder = 100
+                }
+
+                def Shader "Mix"
+                {
+                    uniform token info:id = "ND_mix_color3"
+                    color3f inputs:bg = (0.3649413, 0.830448, 1) (
+                        colorSpace = "srgb_texture"
+                    )
+                    color3f inputs:fg = (1, 1, 1) (
+                        colorSpace = "srgb_texture"
+                    )
+                    float inputs:mix.connect = </Root/SkyDome/mtl/GridMATSG/WorleyNoise3D.outputs:out>
+                    color3f outputs:out
+                    float2 ui:nodegraph:node:pos = (-201.27344, 19.867188)
+                    int ui:nodegraph:node:stackingOrder = 106
+                }
+
+                def Shader "UnlitSurface"
+                {
+                    uniform token info:id = "ND_realitykit_unlit_surfaceshader"
+                    bool inputs:applyPostProcessToneMap
+                    color3f inputs:color.connect = </Root/SkyDome/mtl/GridMATSG/Mix.outputs:out>
+                    bool inputs:hasPremultipliedAlpha
+                    float inputs:opacity.connect = </Root/SkyDome/mtl/GridMATSG/Clamp.outputs:out>
+                    float inputs:opacityThreshold
+                    token outputs:out
+                    float2 ui:nodegraph:node:pos = (59.773438, 45.378906)
+                    int ui:nodegraph:node:stackingOrder = 165
+                }
+
+                def Shader "Position_1"
+                {
+                    uniform token info:id = "ND_position_vector3"
+                    string inputs:space = "world"
+                    float3 outputs:out
+                    float2 ui:nodegraph:node:pos = (-770.58984, 322.16016)
+                    int ui:nodegraph:node:stackingOrder = 131
+                }
+
+                def Shader "CameraPosition"
+                {
+                    uniform token info:id = "ND_realitykit_cameraposition_vector3"
+                    float3 outputs:out
+                    float2 ui:nodegraph:node:pos = (-808.3203, 424.8203)
+                    int ui:nodegraph:node:stackingOrder = 133
+                }
+
+                def Shader "MTLDistance"
+                {
+                    uniform token info:id = "ND_MTL_distance_vector3_float"
+                    float3 inputs:x.connect = </Root/SkyDome/mtl/GridMATSG/Position_1.outputs:out>
+                    float3 inputs:y.connect = </Root/SkyDome/mtl/GridMATSG/CameraPosition.outputs:out>
+                    float outputs:out
+                    float2 ui:nodegraph:node:pos = (-587.3086, 367.5547)
+                    int ui:nodegraph:node:stackingOrder = 138
+                }
+
+                def Shader "Clamp"
+                {
+                    uniform token info:id = "ND_clamp_float"
+                    float inputs:high
+                    float inputs:in.connect = </Root/SkyDome/mtl/GridMATSG/Power.outputs:out>
+                    float inputs:low
+                    float outputs:out
+                    float2 ui:nodegraph:node:pos = (-144.42969, 213.57422)
+                    int ui:nodegraph:node:stackingOrder = 152
+                }
+
+                def Shader "Power"
+                {
+                    uniform token info:id = "ND_power_float"
+                    float inputs:in1.connect = </Root/SkyDome/mtl/GridMATSG/Multiply_1.outputs:out>
+                    float inputs:in2 = 5
+                    float outputs:out
+                    float2 ui:nodegraph:node:pos = (-311.8711, 382.4414)
+                    int ui:nodegraph:node:stackingOrder = 154
+                }
+
+                def Shader "Multiply_1"
+                {
+                    uniform token info:id = "ND_multiply_float"
+                    float inputs:in1.connect = </Root/SkyDome/mtl/GridMATSG/MTLDistance.outputs:out>
+                    float inputs:in2 = 0.2
+                    float outputs:out
+                    float2 ui:nodegraph:node:pos = (-410.1914, 347.05078)
+                    int ui:nodegraph:node:stackingOrder = 159
                 }
             }
         }
 
-        def "Ground" (
-            prepend references = @Ground/Ground.usda@
+        over "Grid" (
+            active = false
         )
         {
+            def RealityKitComponent "RigidBody"
+            {
+                uniform token info:id = "RealityKit.RigidBody"
+                token motionType = "Static"
+
+                def RealityKitStruct "massFrame"
+                {
+                    def RealityKitStruct "m_pose"
+                    {
+                    }
+                }
+
+                def RealityKitStruct "material"
+                {
+                }
+            }
+        }
+
+        over "Ground_01" (
+            prepend apiSchemas = ["MaterialBindingAPI"]
+        )
+        {
+            rel material:binding = </Root/SkyDome/mtl/GridMATSG> (
+                bindMaterialAs = "weakerThanDescendants"
+            )
         }
     }
 }
