@@ -17,6 +17,9 @@ class AppModel {
     }
 
     var immersiveSpaceState: ImmersiveSpaceState = .closed
+    
+    // Level selection
+    var selectedLevel: LevelConfig = StadiumLevel()
 
     // car state
     var vehicleSpeed: Float = 0.0

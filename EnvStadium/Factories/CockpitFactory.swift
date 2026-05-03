@@ -5,18 +5,14 @@ import SwiftUI
 struct CockpitFactory {
     
     @MainActor
-    static func create(useSteeringWheel: Bool) -> Entity {
+    static func create(useSteeringWheel: Bool) async -> Entity {
         let root = Entity()
         root.name = "Cockpit"
         
-        // 1. Load Assets
-        let assetNames = ["cockpit", "cockpit.usdc"]
-        let asset = assetNames.compactMap { try? Entity.load(named: $0) }.first ?? 
-                    (try? Entity.load(named: "cockpit", in: realityKitContentBundle))
-        
+        // 1. Load Assets via Service
         var cockpitComp = CockpitComponent(useSteeringWheel: useSteeringWheel)
         
-        if let asset {
+        if let asset = try? await ResourceService.shared.loadEntity(named: "cockpit") {
             root.addChild(asset)
             cockpitComp.leftThrottle = asset.findEntity(named: "ThrottleController_001") ?? asset.findEntity(named: "ThrottleController.001")
             cockpitComp.rightThrottle = asset.findEntity(named: "ThrottleController_002") ?? asset.findEntity(named: "ThrottleController.002")

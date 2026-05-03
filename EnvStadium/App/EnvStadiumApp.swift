@@ -20,10 +20,13 @@ struct EnvStadiumApp: App {
         VehicleComponent.registerComponent()
         InteractableControlComponent.registerComponent()
         HandTrackingComponent.registerComponent()
+        CockpitComponent.registerComponent()
+        AppModelServiceComponent.registerComponent()
         
         // Register Systems
         HandTrackingSystem.registerSystem()
         VehicleControlSystem.registerSystem()
+        CockpitSystem.registerSystem()
     }
     
     var body: some SwiftUI.Scene {

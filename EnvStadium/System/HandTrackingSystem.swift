@@ -1,10 +1,3 @@
-//
-//  HandTrackingSystem.swift
-//  EnvStadium
-//
-//  Created by Muhammad Tafani Rabbani on 30/04/26.
-//
-
 import RealityKit
 import ARKit
 
@@ -13,28 +6,24 @@ struct HandTrackingSystem: System {
     static let handTracking  = HandTrackingProvider()
     static var latestLeftHand:  HandAnchor?
     static var latestRightHand: HandAnchor?
-    static var appModel: AppModel?
 
     static let query = EntityQuery(where: .has(HandTrackingComponent.self))
 
-    init(scene: RealityKit.Scene) {
-        Task { await Self.runSession() }
-    }
+    init(scene: RealityKit.Scene) {}
 
     @MainActor
-    static func runSession() async {
-        // won't work on simulator, just show alert and bail
+    static func runSession(appModel: AppModel) async {
         guard HandTrackingProvider.isSupported else {
-            appModel?.errorMessage = "Hand tracking not supported here (expected in Simulator)."
-            appModel?.showErrorAlert = true
+            appModel.errorMessage = "Hand tracking not supported here (expected in Simulator)."
+            appModel.showErrorAlert = true
             return
         }
 
         do {
             try await arSession.run([handTracking])
         } catch {
-            appModel?.errorMessage = "ARKit failed: \(error.localizedDescription)"
-            appModel?.showErrorAlert = true
+            appModel.errorMessage = "ARKit failed: \(error.localizedDescription)"
+            appModel.showErrorAlert = true
             return
         }
 

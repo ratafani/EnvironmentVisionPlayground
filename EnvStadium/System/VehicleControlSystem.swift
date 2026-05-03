@@ -12,8 +12,7 @@ struct VehicleControlSystem: System {
     static let vehicleQuery = EntityQuery(where: .has(VehicleComponent.self))
     static let controlQuery = EntityQuery(where: .has(InteractableControlComponent.self))
     static let handQuery    = EntityQuery(where: .has(HandTrackingComponent.self))
-
-    static var appModel: AppModel?
+    static let serviceQuery = EntityQuery(where: .has(AppModelServiceComponent.self))
 
     init(scene: RealityKit.Scene) {}
 
@@ -22,8 +21,12 @@ struct VehicleControlSystem: System {
         let hands    = context.entities(matching: Self.handQuery,    updatingSystemWhen: .rendering)
         let controls = context.entities(matching: Self.controlQuery, updatingSystemWhen: .rendering)
         let vehicles = context.entities(matching: Self.vehicleQuery, updatingSystemWhen: .rendering)
-
-        guard let appModel = Self.appModel else { return }
+        
+        // Find the injected AppModel
+        guard let serviceEntity = context.entities(matching: Self.serviceQuery, updatingSystemWhen: .rendering).first(where: { _ in true }),
+              let appModel = serviceEntity.components[AppModelServiceComponent.self]?.appModel else {
+            return 
+        }
 
         // 1. Natural Hand Tracking Logic
         for control in controls {
@@ -65,8 +68,8 @@ struct VehicleControlSystem: System {
             vc.headingAngle += -steer * 0.8 * appModel.steeringSensitivity * dt
             vc.bankAngle     = MathUtilities.lerp(from: vc.bankAngle, to: -steer * 0.25, t: dt * 3.0)
 
-            vehicle.orientation = simd_quatf(angle: vc.headingAngle, axis: [0, 1, 0])
-                                 * simd_quatf(angle: vc.bankAngle,    axis: [0, 0, 1])
+            vehicle.orientation = simd_quatf(angle: Float(vc.headingAngle), axis: [0, 1, 0])
+                                 * simd_quatf(angle: Float(vc.bankAngle),    axis: [0, 0, 1])
 
             vc.speed = MathUtilities.lerp(from: vc.speed, to: appModel.vehicleSpeed, t: dt * 3.0)
             let forward = vehicle.transform.matrix.columns.2.xyz
