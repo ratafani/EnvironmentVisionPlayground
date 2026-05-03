@@ -12,6 +12,10 @@ struct SettingsView: View {
         @Bindable var model = appModel
         
         Form {
+            Section(header: Text("Control Scheme")) {
+                Toggle("Use Virtual Steering Wheel", isOn: $model.useSteeringWheel)
+            }
+            
             Section(header: Text("Controls Sensitivity")) {
                 VStack(alignment: .leading) {
                     Text("Steering Sensitivity: \(String(format: "%.1f", model.steeringSensitivity))")

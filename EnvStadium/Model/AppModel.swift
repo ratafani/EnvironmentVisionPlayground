@@ -22,8 +22,13 @@ class AppModel {
     var vehicleSpeed: Float = 0.0
     var steeringAngle: Float = 0.0
     var steeringInput: Float = 0.0  // -1 left, +1 right
+    
+    // Individual throttle inputs for Tank Drive logic
+    var leftThrottleInput: Float = 0.0
+    var rightThrottleInput: Float = 0.0
 
     // settings
+    var useSteeringWheel: Bool = false
     var steeringSensitivity: Float = 1.0
     var throttleSensitivity: Float = 1.0
 

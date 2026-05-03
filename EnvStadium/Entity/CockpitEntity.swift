@@ -7,68 +7,92 @@
 
 import RealityKit
 import SwiftUI
+import RealityKitContent
 
 class CockpitEntity: Entity {
-
-    private var dashboard: ModelEntity?
-    private var steeringWheel: ModelEntity?
-    private var powerStick: ModelEntity?
-
+    
+    private var leftThrottle: Entity?
+    private var rightThrottle: Entity?
+    private var steeringWheel: Entity?
+    
     @MainActor
     required init() {
         super.init()
         self.name = "Cockpit"
-        buildDashboard()
-        buildWheel()
-        buildStick()
+        setupRealAsset()
+    }
+    
+    @MainActor
+    convenience init(useSteeringWheel: Bool) {
+        self.init()
+        updateControlScheme(useSteeringWheel: useSteeringWheel)
+    }
+    
+    private func setupRealAsset() {
+        let assetNames = ["cockpit", "cockpit.usdc"]
+        let asset = assetNames.compactMap { try? Entity.load(named: $0) }.first ?? 
+                    (try? Entity.load(named: "cockpit", in: realityKitContentBundle))
+        
+        guard let asset else { return }
+        self.addChild(asset)
+        
+        // Map controls
+        leftThrottle = asset.findEntity(named: "ThrottleController_001") ?? asset.findEntity(named: "ThrottleController.001")
+        rightThrottle = asset.findEntity(named: "ThrottleController_002") ?? asset.findEntity(named: "ThrottleController.002")
+        
+        setupLighting()
+        
+        for throttle in [leftThrottle, rightThrottle].compactMap({ $0 }) {
+            throttle.components.set(InputTargetComponent())
+            let shape = ShapeResource.generateSphere(radius: 0.15)
+            var collision = CollisionComponent(shapes: [shape], isStatic: true)
+            collision.filter = CollisionFilter(group: .all, mask: .all)
+            throttle.components.set(collision)
+            throttle.components.set(InteractableControlComponent(controlType: .power))
+        }
     }
 
-    private func buildDashboard() {
-        let d = ModelEntity(
-            mesh: .generateBox(size: [0.8, 0.2, 0.1], cornerRadius: 0.05),
-            materials: [UnlitMaterial(color: .darkGray)]
-        )
-        d.position = [0, 0, 0]
-        self.addChild(d)
-        self.dashboard = d
+    private func setupLighting() {
+        let lamp = Entity()
+        lamp.components.set(PointLightComponent(color: .white, attenuationRadius: 100))
+        lamp.position = [0, 1.5, -0.45]
+        self.addChild(lamp)
     }
 
-    private func buildWheel() {
-        guard let dashboard else { return }
-        let wheel = ModelEntity(
-            mesh: .generateCylinder(height: 0.02, radius: 0.15),
-            materials: [UnlitMaterial(color: .black)]
-        )
+    func updateControlScheme(useSteeringWheel: Bool) {
+        if useSteeringWheel {
+            if steeringWheel == nil {
+                setupProceduralSteeringWheel()
+            }
+            steeringWheel?.isEnabled = true
+        } else {
+            steeringWheel?.isEnabled = false
+        }
+    }
+    
+    private func setupProceduralSteeringWheel() {
+        // Simple procedural wheel using a thin Cylinder
+        let wheel = ModelEntity(mesh: .generateCylinder(height: 0.02, radius: 0.12), 
+                                materials: [SimpleMaterial(color: .black, isMetallic: true)])
         wheel.name = "SteeringWheel"
-        wheel.position = [0, 0.15, 0.05]
-        wheel.orientation = simd_quatf(angle: .pi / 2, axis: [1, 0, 0])
-        wheel.components.set(InteractableControlComponent(controlType: .steering))
+        // Position it right in front of the driver, above the dashboard
+        wheel.position = [0, 0.7, -0.45]
+        // Tilt it towards the user (X-axis)
+        wheel.orientation = simd_quatf(angle: .pi/2.5, axis: [1, 0, 0]) 
+        
         wheel.components.set(InputTargetComponent())
-        wheel.components.set(CollisionComponent(shapes: [.generateBox(size: [0.32, 0.32, 0.04])]))
-        dashboard.addChild(wheel)
+        wheel.components.set(CollisionComponent(shapes: [.generateSphere(radius: 0.15)]))
+        wheel.components.set(InteractableControlComponent(controlType: .steering))
+        
+        self.addChild(wheel)
         self.steeringWheel = wheel
     }
-
-    private func buildStick() {
-        guard let dashboard else { return }
-        let stick = ModelEntity(
-            mesh: .generateCylinder(height: 0.2, radius: 0.04),
-            materials: [UnlitMaterial(color: .red)]
-        )
-        stick.name = "PowerStick"
-        stick.position = [0.3, 0.1, 0.05]
-        stick.components.set(InteractableControlComponent(controlType: .power))
-        stick.components.set(InputTargetComponent())
-        stick.components.set(CollisionComponent(shapes: [.generateCapsule(height: 0.2, radius: 0.04)]))
-        dashboard.addChild(stick)
-        self.powerStick = stick
-    }
-
+    
     // scales up from 0 when u enter the space
     func animateIn() {
-        let from = Transform(scale: .zero, rotation: self.orientation, translation: self.position)
+        let from = Transform(scale: [0.001, 0.001, 0.001], rotation: self.orientation, translation: self.position)
         let to   = Transform(scale: .one,  rotation: self.orientation, translation: self.position)
-
+        
         let anim = FromToByAnimation<Transform>(
             name: "build",
             from: from, to: to,
@@ -76,12 +100,12 @@ class CockpitEntity: Entity {
             timing: .easeInOut,
             bindTarget: .transform
         )
-
+        
         guard let resource = try? AnimationResource.generate(with: anim) else {
             self.scale = .one
             return
         }
-
+        
         self.scale = .zero
         self.playAnimation(resource)
     }
