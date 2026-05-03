@@ -11,18 +11,16 @@ import RealityKitContent
 import ARKit
 struct ImmersiveView: View {
     @Environment(AppModel.self) var appModel
-    @State private var cockpit: CockpitEntity?
+    @State private var cockpit: Entity?
 
     var body: some View {
         RealityView { content in
             VehicleControlSystem.appModel = appModel
             HandTrackingSystem.appModel = appModel
 
-            // visionOS origin = floor. eye level ≈ 1.6m up
-            let cockpit = CockpitEntity(useSteeringWheel: appModel.useSteeringWheel)
+            let cockpit = CockpitFactory.create(useSteeringWheel: appModel.useSteeringWheel)
             cockpit.position = [0, 0.4, 0]
             content.add(cockpit)
-            cockpit.animateIn()
             self.cockpit = cockpit
 
             // world moves, not u
@@ -48,7 +46,10 @@ struct ImmersiveView: View {
             content.add(rightHand)
         }
         .onChange(of: appModel.useSteeringWheel) { _, newValue in
-            cockpit?.updateControlScheme(useSteeringWheel: newValue)
+            if var comp = cockpit?.components[CockpitComponent.self] {
+                comp.useSteeringWheel = newValue
+                cockpit?.components.set(comp)
+            }
         }
         .gesture(
             DragGesture(minimumDistance: 0)
