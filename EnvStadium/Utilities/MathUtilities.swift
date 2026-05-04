@@ -22,3 +22,7 @@ enum MathUtilities {
         outMin + (outMax - outMin) * (value - inMin) / (inMax - inMin)
     }
 }
+
+extension SIMD4 {
+    var xyz: SIMD3<Scalar> { SIMD3(x, y, z) }
+}

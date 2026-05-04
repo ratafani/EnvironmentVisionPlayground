@@ -4,6 +4,8 @@ import RealityKitContent
 
 struct ImmersiveView: View {
     @Environment(AppModel.self) var appModel
+    @Environment(\.dismissImmersiveSpace) var dismissImmersiveSpace
+    @Environment(\.openWindow) var openWindow
     @State private var viewModel: ImmersiveViewModel
     
     init(level: LevelConfig? = nil) {
@@ -27,6 +29,20 @@ struct ImmersiveView: View {
                 .onChanged { viewModel.handleDragChanged($0) }
                 .onEnded { viewModel.handleDragEnded($0) }
         )
+        .ornament(attachmentAnchor: .scene(.bottom)) {
+            Button(role: .destructive) {
+                Task {
+                    appModel.immersiveSpaceState = .inTransition
+                    await dismissImmersiveSpace()
+                    appModel.immersiveSpaceState = .closed
+                    openWindow(id: "main")
+                }
+            } label: {
+                Label("Exit Simulation", systemImage: "xmark.circle.fill")
+                    .padding()
+            }
+            .glassBackgroundEffect()
+        }
     }
 }
 

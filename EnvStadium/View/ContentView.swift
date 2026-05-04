@@ -10,6 +10,7 @@ import RealityKit
 
 struct ContentView: View {
     @Environment(AppModel.self) private var appModel
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         NavigationStack {
@@ -41,6 +42,14 @@ struct ContentView: View {
             }
             .padding()
             .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        openWindow(id: appModel.debugWindowID)
+                    } label: {
+                        Label("Debug Hands", systemImage: "hand.raised.fill")
+                    }
+                }
+                
                 ToolbarItem(placement: .topBarTrailing) {
                     NavigationLink(destination: SettingsView()) {
                         Label("Settings", systemImage: "gearshape")

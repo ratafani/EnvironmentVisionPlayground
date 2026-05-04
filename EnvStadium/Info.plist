@@ -11,5 +11,13 @@
 		<key>UISceneConfigurations</key>
 		<dict/>
 	</dict>
+	<key>NSWorldSensingUsageDescription</key>
+	<string>Boleh coba tidak</string>
+	<key>NSHandsTrackingUsageDescription</key>
+	<string>Boleh coba tidak</string>
+	<key>NSAccessoryTrackingUsageDescription</key>
+	<string>Boleh coba tidak</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Boleh coba tidak</string>
 </dict>
 </plist>

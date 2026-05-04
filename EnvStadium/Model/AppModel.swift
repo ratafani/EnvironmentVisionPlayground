@@ -11,6 +11,23 @@ import SwiftUI
 @Observable
 class AppModel {
     let immersiveSpaceID = "ImmersiveSpace"
+    let debugWindowID = "DebugWindow"
+
+    struct HandDebugInfo {
+        var isTracked: Bool = false
+        var isGrabbing: Bool = false
+        var indexCurled: Bool = false
+        var middleCurled: Bool = false
+        var ringCurled: Bool = false
+        var pinkyCurled: Bool = false
+        var thumbCurled: Bool = false
+        var nearestControlName: String? = nil
+        var nearestControlDistance: Float? = nil
+        var localPosition: SIMD3<Float>? = nil
+    }
+
+    var leftHandDebug = HandDebugInfo()
+    var rightHandDebug = HandDebugInfo()
 
     enum ImmersiveSpaceState {
         case closed, inTransition, open

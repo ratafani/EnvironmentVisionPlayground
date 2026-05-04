@@ -31,7 +31,6 @@ struct ToggleImmersiveSpaceButton: View {
                         switch await openImmersiveSpace(id: appModel.immersiveSpaceID) {
                             case .opened:
                                 appModel.immersiveSpaceState = .open
-                                dismissWindow(id: "main")
 
                             case .userCancelled, .error:
                                 fallthrough

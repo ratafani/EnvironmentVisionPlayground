@@ -8,11 +8,13 @@ struct CockpitFactory {
     static func create(useSteeringWheel: Bool) async -> Entity {
         let root = Entity()
         root.name = "Cockpit"
+        root.scale = SIMD3<Float>(repeating: SimulationConfig.shared.cockpitScale)
         
         // 1. Load Assets via Service
         var cockpitComp = CockpitComponent(useSteeringWheel: useSteeringWheel)
         
         if let asset = try? await ResourceService.shared.loadEntity(named: "cockpit") {
+            asset.scale = [0.6,0.6,0.6]
             root.addChild(asset)
             cockpitComp.leftThrottle = asset.findEntity(named: "ThrottleController_001") ?? asset.findEntity(named: "ThrottleController.001")
             cockpitComp.rightThrottle = asset.findEntity(named: "ThrottleController_002") ?? asset.findEntity(named: "ThrottleController.002")

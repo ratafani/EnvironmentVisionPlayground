@@ -29,7 +29,7 @@ struct CockpitSystem: System {
     
     private func animateIn(_ entity: Entity) {
         let from = Transform(scale: [0.001, 0.001, 0.001], rotation: entity.orientation, translation: entity.position)
-        let to   = Transform(scale: .one,  rotation: entity.orientation, translation: entity.position)
+        let to   = Transform(scale: entity.scale,  rotation: entity.orientation, translation: entity.position)
         
         if let anim = try? AnimationResource.generate(with: FromToByAnimation<Transform>(
             name: "build", from: from, to: to, duration: 1.5, timing: .easeInOut, bindTarget: .transform

@@ -20,14 +20,18 @@ struct HandTrackingSystem: System {
         }
 
         do {
+            print("ARKit: Starting hand tracking session...")
             try await arSession.run([handTracking])
+            print("ARKit: Hand tracking session running.")
         } catch {
+            print("ARKit Error: \(error)")
             appModel.errorMessage = "ARKit failed: \(error.localizedDescription)"
             appModel.showErrorAlert = true
             return
         }
 
         for await update in handTracking.anchorUpdates {
+            print("ARKit: Hand update received for \(update.anchor.chirality)")
             switch update.anchor.chirality {
             case .left:  latestLeftHand  = update.anchor
             case .right: latestRightHand = update.anchor
@@ -43,9 +47,41 @@ struct HandTrackingSystem: System {
             let anchor = hc.chirality == .left ? Self.latestLeftHand : Self.latestRightHand
             guard let anchor, let skeleton = anchor.handSkeleton else { continue }
 
-            hc.isGrabbing    = GrabGestureDetector.isGrabbing(skeleton: skeleton)
+            let details = GrabGestureDetector.getDetails(skeleton: skeleton)
             hc.wristPosition = HandPoseUtilities.worldPosition(of: .wrist, handAnchor: anchor, skeleton: skeleton)
             hc.palmPosition  = HandPoseUtilities.worldPosition(of: .middleFingerKnuckle, handAnchor: anchor, skeleton: skeleton)
+
+            // Anti-jitter logic for Grab
+            if details.isGrabbing {
+                hc.grabFrameCount = min(hc.grabFrameCount + 1, 10)
+            } else {
+                hc.grabFrameCount = max(hc.grabFrameCount - 1, 0)
+            }
+            
+            let wasGrabbing = hc.isGrabbingFiltered
+            if hc.grabFrameCount >= 3 {
+                hc.isGrabbingFiltered = true
+            } else if hc.grabFrameCount == 0 {
+                hc.isGrabbingFiltered = false
+            }
+            
+            hc.isGrabbing = hc.isGrabbingFiltered
+            
+            // Populate finger states for debugging
+            hc.thumbCurled  = details.thumb
+            hc.indexCurled  = details.index
+            hc.middleCurled = details.middle
+            hc.ringCurled   = details.ring
+            hc.pinkyCurled  = details.pinky
+
+            // Relative Grab Position Logic
+            if hc.isGrabbingFiltered {
+                if !wasGrabbing || hc.initialGrabPosition == nil {
+                    hc.initialGrabPosition = hc.palmPosition
+                }
+            } else {
+                hc.initialGrabPosition = nil
+            }
 
             entity.components.set(hc)
         }

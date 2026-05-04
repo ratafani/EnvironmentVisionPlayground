@@ -25,8 +25,12 @@ struct EnvStadiumApp: App {
         
         // Register Systems
         HandTrackingSystem.registerSystem()
-        VehicleControlSystem.registerSystem()
+        VehicleInteractionSystem.registerSystem()
+        VehiclePhysicsSystem.registerSystem()
+        CockpitVisualSystem.registerSystem()
         CockpitSystem.registerSystem()
+        DebugHandVisualSystem.registerSystem()
+        HandDebugSystem.registerSystem()
     }
     
     var body: some SwiftUI.Scene {
@@ -50,5 +54,11 @@ struct EnvStadiumApp: App {
                 }
         }
         .immersionStyle(selection: .constant(.full), in: .full)
+        
+        WindowGroup(id: appModel.debugWindowID) {
+            HandDebugView()
+                .environment(appModel)
+        }
+        .defaultSize(width: 500, height: 600)
     }
 }
